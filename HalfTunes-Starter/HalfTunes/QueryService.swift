@@ -39,12 +39,42 @@ class QueryService {
   var tracks: [Track] = []
   var errorMessage = ""
 
-  // TODO
-
+  // Initialize URL Session under default config
+  let defaultSession = URLSession(configuration: .default)
+  // Declared URLSessionDataTask variable to make http get requests
+  var dataTask: URLSessionDataTask?
+  
+  
   func getSearchResults(searchTerm: String, completion: @escaping QueryResult) {
-    // TODO
-    DispatchQueue.main.async {
-      completion(self.tracks, self.errorMessage)
+    // cancel dataTask if it already exists. Reuse dataTask object for new query
+    dataTask?.cancel()
+    
+    // Include the user's search string in the query URL.
+    // Create URLComponents object from iTunes Search base URL
+    if var urlComponents = URLComponents.init(string: "https://itunes.apple.com/search") {
+      // set URLComponent object's query string, ensuring that characters in the search string are properly escaped.
+      urlComponents.query = "media=music&entity=song&term=\(searchTerm)"
+      // url property of urlComponents might be nil, so optional-bind it to url
+      guard let url = urlComponents.url else { return }
+      
+      // From session created, initialize URLSessionDataTask with query url and completion handler to call when data task completes
+      dataTask = defaultSession.dataTask(with: url) { data, response, error in
+        defer { self.dataTask = nil }
+        // if HTTP request is successful, call helper method updateSearchResults(_:), which parses response data into tracks array
+        if let error = error {
+          self.errorMessage += "DataTask error: " + error.localizedDescription + "\n"
+        } else if let data = data,
+          let response = response as? HTTPURLResponse,
+          response.statusCode == 200 {
+          self.updateSearchResults(data)
+          // Switch to main queue to pass tracks to completion handler in SearchVC+SearchBarDelegate.swift
+          DispatchQueue.main.async {
+            completion(self.tracks, self.errorMessage)
+          }
+        }
+      }
+      // All tasks start in a suspended state by default calling resume() starts dataTask
+      dataTask?.resume()
     }
   }
 
