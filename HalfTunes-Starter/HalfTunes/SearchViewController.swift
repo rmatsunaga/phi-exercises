@@ -51,7 +51,11 @@ class SearchViewController: UIViewController {
     return documentsPath.appendingPathComponent(url.lastPathComponent)
   }
   
+  // Lazy creation allows delay of session creation until after view controller is initialized. 
   lazy var downloadsSession: URLSession = {
+    // Initialize separate session with default config.
+    // Specify delegate to receive URLSession events via delegate calls
+    // Setting delegate quque to nil causes sessiont o create serial operation queue to perform all calls to delegate methods and completion handlers
     let configuration = URLSessionConfiguration.default
     return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
   }()
