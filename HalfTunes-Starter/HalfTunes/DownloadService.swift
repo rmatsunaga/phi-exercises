@@ -56,16 +56,42 @@ class DownloadService {
   // TODO: previewURL is http://a902.phobos.apple.com/...
   // why doesn't ATS prevent this download?
 
+  //  Difference in cancel(byProducingResumeData:) vs cancel().
+  // Provides closure parameter to save resume data to appropriate Download for future resumption
+  // Indicates that file no longer downloading
   func pauseDownload(_ track: Track) {
-    // TODO
+    guard let download = activeDownloads[track.previewURL] else { return }
+    if download.isDownloading {
+      download.task?.cancel(byProducingResumeData: { data in
+        download.resumeData = data
+      })
+      download.isDownloading = false
+    }
   }
 
+  // While still downloading, finds file URL in dictionary, cancels download task, removes file from activeDownloads dictionary
   func cancelDownload(_ track: Track) {
-    // TODO
+    if let download = activeDownloads[track.previewURL] {
+      download.task?.cancel()
+      activeDownloads[track.previewURL] = nil
+    }
   }
 
+  // Checks appropriate download for resume data.
   func resumeDownload(_ track: Track) {
-    // TODO
+    guard let download = activeDownloads[track.previewURL] else { return }
+    
+    // if found, create new download task with downloadTask(withResumeData:)
+    if let resumeData = download.resumeData {
+      download.task = downloadsSession.downloadTask(withResumeData: resumeData)
+    } else {
+      // if missing, create new download task with download URL
+      download.task = downloadsSession.downloadTask(with: download.track.previewURL)
+    }
+    // Start task by calling function.
+    download.task!.resume()
+    // Indicates that download is occurring
+    download.isDownloading = true
   }
 
 }
