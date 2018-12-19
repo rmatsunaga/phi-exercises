@@ -56,7 +56,9 @@ class SearchViewController: UIViewController {
     // Initialize separate session with default config.
     // Specify delegate to receive URLSession events via delegate calls
     // Setting delegate quque to nil causes sessiont o create serial operation queue to perform all calls to delegate methods and completion handlers
-    let configuration = URLSessionConfiguration.default
+    
+    // Special background session config to allow app to create new background sesssion if needed.
+    let configuration = URLSessionConfiguration.background(withIdentifier: "bgSessionConfiguration")
     return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
   }()
   

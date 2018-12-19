@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 extension SearchViewController: URLSessionDownloadDelegate {
   func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
     // Extract original request URL from task & remove corresponding download from dictionary
@@ -45,6 +46,19 @@ extension SearchViewController: URLSessionDownloadDelegate {
     DispatchQueue.main.async {
       if let trackCell = self.tableView.cellForRow(at: IndexPath(row: download.track.index, section: 0)) as? TrackCell {
         trackCell.updateDisplay(progress:download.progress, totalSize: totalSize)
+      }
+    }
+  }
+}
+
+extension SearchViewController: URLSessionDelegate {
+  
+  func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+    DispatchQueue.main.async {
+      if let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+        let completionHandler = appDelegate.backgroundSessionCompletionHandler {
+        appDelegate.backgroundSessionCompletionHandler = nil
+        completionHandler()
       }
     }
   }

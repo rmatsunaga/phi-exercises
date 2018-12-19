@@ -33,6 +33,17 @@
  @UIApplicationMain
  class AppDelegate: UIResponder, UIApplicationDelegate {
   
+  // save completionHandler as variable in app delegate for later use
+  // Wakes up app to deal with completed background task.
+  // re-creates background configuration and session, using identifier provided in method. Since app creates background session when instantiates SearchViewController, the connection's been made
+  // Captures completion handler provided by method. Invoking completion handler lets OS know that app's donw working with background activities for current session and allows OS to snapshot updated UI for display in app switcher
+  var backgroundSessionCompletionHandler: (() -> Void)?
+  func application(_ application: UIApplication, handleEventsForBackgroundURLSession
+    identifier: String, completionHandler: @escaping () -> Void) {
+    backgroundSessionCompletionHandler = completionHandler
+  }
+  
+  
   var window: UIWindow?
   let tintColor =  UIColor(red: 242/255, green: 71/255, blue: 63/255, alpha: 1)
   
