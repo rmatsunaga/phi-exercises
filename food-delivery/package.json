@@ -1,8 +1,8 @@
 {
-    "main": "index.js",
-    "scripts": {},
-    "dependencies": {
-      "body-parser": "^1.18.2",
-      "express": "^4.16.2"
-    }
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2"
   }
+}
